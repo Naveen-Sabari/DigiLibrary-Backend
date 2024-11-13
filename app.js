@@ -10,6 +10,8 @@ const authLoginRoutes = require('./routes/authlogin');
 const userRoutes = require('./routes/user');
 const cloudinary = require('cloudinary').v2;
 
+const bcrypt = require('bcryptjs');
+
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME, 
   api_key: process.env.API_KEY,
