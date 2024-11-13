@@ -11,9 +11,9 @@ const userRoutes = require('./routes/user');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({
-  cloud_name: 'dnevcmh6x', 
-  api_key: '527741836626224',       
-  api_secret: 'khk1-kUxqv2m2fTRyuirif3j2Fw'  
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
 });
 
 const app = express();
