@@ -35,7 +35,7 @@ router.post('/auth', async (req, res) => {
 
     return res.status(400).json({ msg: 'Invalid action. Use "signup" or "login"' });
   } catch (err) {
-    console.error(err);
+
     res.status(500).json({ msg: 'Server error' });
   }
 });

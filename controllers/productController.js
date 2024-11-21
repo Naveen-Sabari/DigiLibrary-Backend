@@ -20,9 +20,9 @@ cloudinary.config({
 exports.createProduct = async (req, res) => {
   try {
    
-    console.log("Request Body: ", req.body);
+  
     const { name, price, description, category, seller, stock, ratings, images } = req.body;
-    console.log("Images Field: ", images);
+
     if (!name || !price || !description || !category || !seller || stock === undefined || ratings === undefined || !images || images.length === 0) {
       return res.status(400).json({
         success: false,
@@ -36,9 +36,9 @@ exports.createProduct = async (req, res) => {
         resource_type: 'auto', 
       });
       image = cloudinaryResponse.secure_url; 
-      console.log("Cloudinary Response Image URL: ", image); 
+
     } else if (image.startsWith('http')) {
-      console.log("Using provided image URL: ", image);
+
     } else {
       return res.status(400).json({
         success: false,
@@ -62,7 +62,7 @@ exports.createProduct = async (req, res) => {
       product: savedProduct,
     });
   } catch (error) {
-    console.error('Error creating product:', error);
+
     return res.status(500).json({
       success: false,
       message: "Error creating product",

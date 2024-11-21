@@ -1,7 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, 'config/config.env') });
+const express = require('express');
+const Stripe = require('stripe');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const connectDatabase = require('./config/connectDatabase');
 const products = require('./routes/product');
 const orders = require('./routes/order');
@@ -10,9 +12,29 @@ const authLoginRoutes = require('./routes/authlogin');
 const userRoutes = require('./routes/user');
 const cloudinary = require('cloudinary').v2;
 const bcrypt = require('bcryptjs');
-
 const app = express();
-dotenv.config({ path: path.join(__dirname, 'config', 'config.env') });
+const DOMAIN = process.env.DOMAIN ;
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const allowedOrigins = [
+  process.env.CLIENT_URL_DEV ,
+  process.env.CLIENT_URL_PROD,
+  process.env.IMP,
+  process.env.IMP1
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
+app.use(express.json());
+app.use(bodyParser.json());
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -22,47 +44,47 @@ cloudinary.config({
 
 connectDatabase();
 
-const allowedOrigins = [
-  process.env.CLIENT_URL_DEV,  
-  process.env.CLIENT_URL_PROD, 
-  "https://673afb851ef44f00084ac20d--nscartin.netlify.app", 
-  "https://6735dbf589dd2259035e8b9a--nscartin.netlify.app" 
-];
-
-
-app.use(cors({
-  origin: function(origin, callback) {
-   
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, 
-}));
-
-app.use(express.json());
 app.use('/api/v1', authRoutes);
 app.use('/api/v1', authLoginRoutes);
 app.use('/api/v1/products', products);
 app.use('/api/v1/orders', orders);
 app.use('/api/v1/users', userRoutes);
 
+app.post('/checkout', async (req, res) => {
+  try {
+    if (!req.body.items || req.body.items.length === 0) {
+      return res.status(400).json({ error: 'No items provided for checkout' });
+    }
+    const line_items = req.body.items.map(item => ({
+      price_data: {
+        currency: 'inr',
+        product_data: {
+          name: item.name,
+          images: [item.image[0]],
+        },
+        unit_amount: item.price * 100, 
+      },
+      quantity: item.quantity, 
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      line_items: line_items,
+      mode: 'payment',
+      success_url: `${DOMAIN}/success`, 
+      cancel_url: `${DOMAIN}/cancel`,  
+    });
+
+    res.status(200).json({ id: session.id });
+  } catch (error) { res.status(500).send({ message: 'Internal Server Error', error: error.message });
+  }
+});
+
 app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
   res.status(500).json({ message: 'Server error' });
 });
 
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode`);
-  console.log(`MongoDB connected with URL: ${process.env.DB_URL}`);
-  console.log(`Server is listening on port ${process.env.PORT}`);
-});
+app.listen(process.env.PORT || 8000, () => {});

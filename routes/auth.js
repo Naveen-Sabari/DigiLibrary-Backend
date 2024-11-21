@@ -39,7 +39,7 @@ router.post('/signup', async (req, res) => {
     return res.status(201).json({ msg: 'User created successfully', token });
 
   } catch (err) {
-    console.error(err);
+  
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
     return res.status(200).json({ msg: 'Login successful', token });
 
   } catch (err) {
-    console.error(err);
+   
     res.status(500).json({ msg: 'Server error' });
   }
 });

@@ -12,7 +12,7 @@ cloudinary.config({
 
   fs.readdir(uploadsFolder, (err, files) => {
     if (err) {
-      console.error('Error reading uploads folder:', err);
+      
       return;
     }
   
@@ -30,10 +30,8 @@ cloudinary.config({
         tags: 'Ns',             
       })
       .then(result => {
-        console.log('Uploaded image:', result.secure_url);
+       
       })
-      .catch(error => {
-        console.error('Error uploading image:', error);
-      });
+      .catch(error => { });
     });
   });

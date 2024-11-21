@@ -33,7 +33,7 @@ exports.CreateOrder = async (req, res, next) => {
       order,
     });
   } catch (error) {
-    console.error(error);
+
     res.status(500).json({
       success: false,
       message: 'Something went wrong while creating the order.',
