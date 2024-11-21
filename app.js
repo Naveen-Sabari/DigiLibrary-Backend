@@ -19,7 +19,8 @@ const allowedOrigins = [
   process.env.CLIENT_URL_DEV ,
   process.env.CLIENT_URL_PROD,
   process.env.IMP,
-  process.env.IMP1
+  process.env.IMP1,
+  process.env.IMP2
 ];
 
 app.use(cors({
