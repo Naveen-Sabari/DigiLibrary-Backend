@@ -22,6 +22,9 @@ const corsOptions = {
 };
 
 
+app.options('*', cors(corsOptions)); 
+
+
 app.use(cors(corsOptions));
 app.post('/checkout', async (req, res) => {
   const { lineItems } = req.body;  
