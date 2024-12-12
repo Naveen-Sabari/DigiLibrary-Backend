@@ -17,7 +17,7 @@ const authLoginRoutes = require('./routes/authlogin');
 const userRoutes = require('./routes/user');
 
 const corsOptions = {
-  origin: [process.env.CORS_ORIGIN, process.env.CORS_ORIGIN1, process.env.CORS_ORIGIN2], 
+  origin: '*',  
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
@@ -49,7 +49,7 @@ app.use('/api/v1/products', products);
 app.use('/api/v1/orders', orders);
 app.use('/api/v1/users', userRoutes);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT ;
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+ 
 });
