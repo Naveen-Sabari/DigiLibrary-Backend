@@ -16,10 +16,11 @@ const userRoutes = require('./routes/user');
 
 
 const corsOptions = {
-  origin:  process.env.CORS_ORIGIN, 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  origin: [process.env.CORS_ORIGIN, process.env.CORS_ORIGIN1], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
+
 
 app.use(cors(corsOptions));
 app.post('/checkout', async (req, res) => {
