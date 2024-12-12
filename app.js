@@ -1,49 +1,48 @@
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, 'config/config.env') });
 const express = require('express');
-const Stripe = require('stripe');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const app = express();
+const cors = require('cors'); 
+const dotenv = require('dotenv');
 const connectDatabase = require('./config/connectDatabase');
+app.use(express.json());
+dotenv.config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+connectDatabase();
 const products = require('./routes/product');
 const orders = require('./routes/order');
 const authRoutes = require('./routes/auth');
 const authLoginRoutes = require('./routes/authlogin');
 const userRoutes = require('./routes/user');
-const cloudinary = require('cloudinary').v2;
-const bcrypt = require('bcryptjs');
-const app = express();
-const DOMAIN = process.env.DOMAIN ;
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const allowedOrigins = [
-  process.env.CLIENT_URL_DEV ,
-  process.env.CLIENT_URL_PROD,
-  process.env.IMP,
-  process.env.IMP1,
-  process.env.IMP2
-];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
 
-app.use(express.json());
-app.use(bodyParser.json());
+const corsOptions = {
+  origin:  process.env.CORS_ORIGIN, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET
+app.use(cors(corsOptions));
+app.post('/checkout', async (req, res) => {
+  const { lineItems } = req.body;  
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],  
+      line_items: lineItems,  
+      mode: 'payment',  
+      success_url: process.env.SUCCESS_URL,  
+      cancel_url: process.env.CANCEL_URL,  
+    });
+
+    res.json({ id: session.id });
+  } catch (error) {
+ res.status(500).send({ message: 'Internal Server Error', error: error.message });
+  }
 });
 
-connectDatabase();
+
+
+
 
 app.use('/api/v1', authRoutes);
 app.use('/api/v1', authLoginRoutes);
@@ -51,41 +50,7 @@ app.use('/api/v1/products', products);
 app.use('/api/v1/orders', orders);
 app.use('/api/v1/users', userRoutes);
 
-app.post('/checkout', async (req, res) => {
-  try {
-    if (!req.body.items || req.body.items.length === 0) {
-      return res.status(400).json({ error: 'No items provided for checkout' });
-    }
-    const line_items = req.body.items.map(item => ({
-      price_data: {
-        currency: 'inr',
-        product_data: {
-          name: item.name,
-          images: [item.image[0]],
-        },
-        unit_amount: item.price * 100, 
-      },
-      quantity: item.quantity, 
-    }));
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: line_items,
-      mode: 'payment',
-      success_url: `${DOMAIN}/success`, 
-      cancel_url: `${DOMAIN}/cancel`,  
-    });
+const port = process.env.PORT  
 
-    res.status(200).json({ id: session.id });
-  } catch (error) { res.status(500).send({ message: 'Internal Server Error', error: error.message });
-  }
-});
-
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: 'Server error' });
-});
-
-app.listen(process.env.PORT , () => {});
+app.listen(port, () => {});

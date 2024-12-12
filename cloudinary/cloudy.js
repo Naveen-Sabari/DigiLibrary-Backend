@@ -8,7 +8,7 @@ cloudinary.config({
   api_secret: process.env.API_SECRET
 });
 
-  const uploadsFolder = path.resolve(__dirname, '../f'); 
+  const uploadsFolder = path.resolve(__dirname, '../images'); 
 
   fs.readdir(uploadsFolder, (err, files) => {
     if (err) {
@@ -26,7 +26,7 @@ cloudinary.config({
       const filePath = path.join(uploadsFolder, file); 
   
       cloudinary.uploader.upload(filePath, {
-        folder: 'my_folder/NS',
+        folder: 'my_folder/images',
         tags: 'Ns',             
       })
       .then(result => {

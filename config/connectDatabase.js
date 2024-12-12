@@ -9,7 +9,7 @@ const connectDatabase = async () => {
       throw new Error('Mongo URI is not defined');
     }
     const conn = await mongoose.connect(process.env.DB_URL); 
-   
+
   } catch (error) {
 
     process.exit(1);  
