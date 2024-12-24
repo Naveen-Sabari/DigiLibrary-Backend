@@ -19,26 +19,26 @@ const userRoutes = require('./routes/user');
 
 
 const allowedOrigins = [
+  'https://digi-library-ns.netlify.app/',
+  'https://digi-library-ns.netlify.app', 
 
-  process.env.IMP,
-  process.env.IMP1,
-  process.env.IMP2,
-  process.env.IMP3,
+  'http://localhost:4200',  
 ];
-
 
 app.use(cors({
   origin: function (origin, callback) {
+ 
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, true); 
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS'), false);  
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], 
+  credentials: true, 
 }));
+
 
 
 
