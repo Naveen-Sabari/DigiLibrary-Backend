@@ -18,32 +18,35 @@ const userRoutes = require('./routes/user');
 
 
 
+const allowedOrigins = [
+
+  process.env.IMP,
+  process.env.IMP1,
+  process.env.IMP2,
+  process.env.IMP3,
+];
 
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      process.env.CORS_ORIGIN,   // For local development
-      process.env.CORS_ORIGIN1,  // For Netlify production
-      process.env.CORS_ORIGIN2   // Another allowed origin
-    ];
-
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);  // Allow the request if origin matches
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'), false);  // Reject the request if origin doesn't match
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,  // Allows cookies or credentials to be sent
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+}));
 
-// Apply CORS middleware globally
-app.use(cors(corsOptions));
 
-// Handle the OPTIONS preflight request
-app.options('*', cors(corsOptions)); 
+
+
+
+
+
+
 
 
 app.post('/checkout', async (req, res) => {
@@ -74,7 +77,9 @@ app.use('/api/v1/products', products);
 app.use('/api/v1/orders', orders);
 app.use('/api/v1/users', userRoutes);
 
-
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 const port = process.env.PORT  
 
 app.listen(port, () => {});
