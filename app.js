@@ -15,22 +15,37 @@ const authLoginRoutes = require('./routes/authlogin');
 const userRoutes = require('./routes/user');
 
 
+
+
+
+
+
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = [process.env.CORS_ORIGIN,process.env.CORS_ORIGIN1, process.env.CORS_ORIGIN2];
+    const allowedOrigins = [
+      process.env.CORS_ORIGIN,   // For local development
+      process.env.CORS_ORIGIN1,  // For Netlify production
+      process.env.CORS_ORIGIN2   // Another allowed origin
+    ];
 
     if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true); 
+      callback(null, true);  // Allow the request if origin matches
     } else {
-      callback(new Error('Not allowed by CORS'), false); 
+      callback(new Error('Not allowed by CORS'), false);  // Reject the request if origin doesn't match
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,  // Allows cookies or credentials to be sent
 };
 
-
+// Apply CORS middleware globally
 app.use(cors(corsOptions));
+
+// Handle the OPTIONS preflight request
+app.options('*', cors(corsOptions)); 
+
+
 app.post('/checkout', async (req, res) => {
   const { lineItems } = req.body;  
 
